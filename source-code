@@ -1,0 +1,199 @@
+#include<iostream>
+#include<string>
+using namespace std;
+
+string message;
+string mappedKey;
+
+int tableArr[26][26];
+void createVigenereTable()
+{
+	for (int i = 0; i < 26; i++)//generates vigenere table with all upper letters
+	{
+		for (int j = 0; j < 26; j++)
+		{
+			int temp;
+			if ((i + 65) + j > 90)//prohibits lowercase letters and symbols
+			{
+				temp = ((i + 65) + j) - 26;
+				tableArr[i][j] = temp;
+			}
+			else
+			{
+				temp = (i + 65) + j;
+				tableArr[i][j] = temp;
+			}
+		}
+	}
+}
+int itrCount(int key, int msg)
+{
+	int counter = 0;
+	string result = "";
+
+	for (int i = 0; i < 26; i++)
+	{
+		if (key + i > 90)//prohibit lowercase letters and symbols
+		{
+			result += (char)(key + (i - 26));
+		}
+		else
+		{
+			result += (char)(key + i);
+		}
+	}
+	for (int i = 0; i < result.length(); i++)
+	{
+		if (result[i] == msg)
+		{
+			break;
+		}
+		else
+		{
+			counter++;
+		}
+	}
+	return counter;
+}
+class Sifre
+{
+public:
+	Sifre();
+
+	Sifre(char *a, char *s);
+
+	void sifrele(string, string);
+	void sifrecoz(string message, string mappedKey);
+	void  sifreKelimesiAta();
+
+private:
+	char* alfabe;
+	char* sifreKelimesi;
+};
+Sifre::Sifre()//our constructor function
+{
+
+}
+Sifre::Sifre(char *a, char *s)//our overloaded constructor function
+{
+	alfabe = a;
+	sifreKelimesi = s;
+}
+void Sifre::sifrele(string message, string mappedKey)
+{
+	{
+		createVigenereTable();//gets our table and apply encyrption alghoritm on it
+		string encrytedText = "";
+		for (int i = 0; i < message.length(); i++)
+		{
+			if (message[i] == 32 && mappedKey[i] == 32)//with this we can enter more than one words
+			{
+				encrytedText += " ";//ads space
+			}
+			else
+			{
+				int x = (int)message[i] - 65;
+				int y = (int)mappedKey[i] - 65;
+				encrytedText += (char)tableArr[x][y];//assings encrypted letters to correct positions
+			}
+		}
+		cout << "Encrypted Text: " << encrytedText;
+	}
+}
+void Sifre::sifreKelimesiAta()
+{
+	{
+		string msg;
+		cout << "Enter message: ";//get our message
+		getline(cin, msg);
+		
+		for (int i = 0; i < msg.length(); i++)
+		{
+			msg[i] = toupper(msg[i]);//convert all letters to uppercase so each will be on same type
+		}
+
+		string key;
+		cout << "Enter key: ";//get our cipher key
+		getline(cin, key);
+
+		for (int i = 0; i < key.length(); i++)
+		{
+			key[i] = toupper(key[i]);//convert all letters to uppercase so each will be on same type
+		}
+
+		string keyMap = "";
+		for (int i = 0, j = 0; i < msg.length(); i++)
+		{
+			if (msg[i] == 32)//controls spaces and put them on right place
+			{
+				keyMap += 32;
+			}
+			else
+			{
+				if (j < key.length())//adds letters in right position
+				{
+					keyMap += key[j];
+					j++;
+				}
+				else
+				{
+					j = 0;
+					keyMap += key[j];
+					j++;
+				}
+			}
+		}
+		message = msg;
+		mappedKey = keyMap;
+	}
+}
+void Sifre::sifrecoz(string message, string mappedKey)
+{
+	string decryptedText = "";
+	for (int i = 0; i < message.length(); i++)
+	{
+		if (message[i] == 32 && mappedKey[i] == 32)//spots spaces and put them in corrects places
+		{
+			decryptedText += " ";
+		}
+		else
+		{
+			int temp = itrCount((int)mappedKey[i], (int)message[i]);//change encrypted message to decrypted message
+			decryptedText += (char)(65 + temp);
+		}
+	}
+	cout << "Decrypted Text: " << decryptedText;
+}
+
+int main()
+{
+	Sifre sifre;//our sifre named object
+	cout << "Message and key can only be alphabetic" << endl;
+	int choice;
+	cout << "1. Encryption\n2. Decryption \n Choose(1,2): ";
+	cin >> choice;
+	cin.ignore();
+
+	if (choice == 1)//with choice 1 calls encrypting functions
+	{
+		cout << "Encryption" << endl;
+		sifre.sifreKelimesiAta();
+		sifre.sifrele(message, mappedKey);
+	}
+	else if (choice == 2)//with choice 2 calls decrypting functions
+	{
+		cout << "Decryption" << endl;
+		sifre.sifreKelimesiAta();
+		sifre.sifrecoz(message, mappedKey);
+	}
+	else
+	{
+		cout << "Wrong Choice" << endl;
+	}
+
+
+	cout << endl;
+
+	system("pause");
+
+}
